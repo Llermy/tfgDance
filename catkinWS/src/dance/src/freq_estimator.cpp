@@ -1,7 +1,3 @@
-//
-//  freq_estimator.cpp
-//  
-
 #include "freq_estimator.hpp"
 #include "ros/ros.h"
 #include <stdlib.h>

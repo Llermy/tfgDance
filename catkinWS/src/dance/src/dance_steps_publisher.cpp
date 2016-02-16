@@ -10,18 +10,27 @@
 #define BASE 2
 #define HEAD 3
 
-
 class DanceStepsPublisher
 {
 public:
     // Moving frequency
     double move_rate;
     
+    // Subscriber to read the frequency
+    ros::Subscriber freq_sub;
+    
     // Publisher for each body part
     ros::Publisher pubLA;
     ros::Publisher pubRA;
     ros::Publisher pubBase;
     ros::Publisher pubHead;
+    
+    void musicCallback(const std_msgs::Float64::ConstPtr& msg)
+    {
+        ROS_INFO("I heard frequency: [%f]", msg->data);
+        move_rate = msg->data;
+        ros::Rate loop_rate(move_rate);
+    }
     
     void command_move(std::string move, int body_part)
     {
@@ -73,11 +82,13 @@ public:
     DanceStepsPublisher()
     {
         ros::NodeHandle n;
+        freq_sub = n.subscribe("musicFrequency", 1000, musicCallback);
         pubLA = n.advertise<std_msgs::Float64>("/alz/leftArm/command", 1000);
         pubRA = n.advertise<std_msgs::Float64>("/alz/rightArm/command", 1000);
         pubBase = n.advertise<std_msgs::Float64>("/alz/base/command", 1000);
         pubHead = n.advertise<std_msgs::Float64>("/alz/head/command", 1000);
         move_rate = 0.5;
+        ros::Rate loop_rate(move_rate);
     }
 };
 
@@ -89,7 +100,6 @@ int main(int argc, char **argv)
     //std::string test_dance[] = {"0.2;0.2;0.5;0", "1;1;;", "0.8;0.8;;", "1;1;;", "0.2;0.2;-0.5;", "1;1;;", "0.8;0.8;;", "1;1;;", "0.2;0.2;0;", ";1;;", "1;0.2;;", "0.2;;;", ";1;;", "1;0.2;;", ";1;;", "0.2;0.2;;"};
     StepsFileReader* reader = new StepsFileReader();
     reader->set_dance(0);
-    ros::Rate loop_rate(steps_pub->move_rate);
 
     while (ros::ok())
     {

@@ -24,12 +24,14 @@ public:
     ros::Publisher pubRA;
     ros::Publisher pubBase;
     ros::Publisher pubHead;
+
+    // Dance steps file reader
+    StepsFileReader* reader;
     
-    void musicCallback(const std_msgs::Float64::ConstPtr& msg)
+    void beatCallback(const std_msgs::Float64::ConstPtr& msg)
     {
-        ROS_INFO("I heard frequency: [%f]", msg->data);
-        move_rate = msg->data;
-        ros::Rate loop_rate(move_rate);
+        publish_step(reader->get_next_step());
+        ROS_INFO("I heard a peak!");
     }
     
     void command_move(std::string move, int body_part)
@@ -82,13 +84,14 @@ public:
     DanceStepsPublisher()
     {
         ros::NodeHandle n;
-        freq_sub = n.subscribe("musicFrequency", 1000, musicCallback);
+        freq_sub = n.subscribe("beats", 1000, &DanceStepsPublisher::beatCallback, this);
         pubLA = n.advertise<std_msgs::Float64>("/alz/leftArm/command", 1000);
         pubRA = n.advertise<std_msgs::Float64>("/alz/rightArm/command", 1000);
         pubBase = n.advertise<std_msgs::Float64>("/alz/base/command", 1000);
         pubHead = n.advertise<std_msgs::Float64>("/alz/head/command", 1000);
-        move_rate = 0.5;
-        ros::Rate loop_rate(move_rate);
+
+        reader = new StepsFileReader();
+        reader->set_dance(0);
     }
 };
 
@@ -96,16 +99,9 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "dance_steps_publisher");
 
-    DanceStepsPublisher* steps_pub = new DanceStepsPublisher();
     //std::string test_dance[] = {"0.2;0.2;0.5;0", "1;1;;", "0.8;0.8;;", "1;1;;", "0.2;0.2;-0.5;", "1;1;;", "0.8;0.8;;", "1;1;;", "0.2;0.2;0;", ";1;;", "1;0.2;;", "0.2;;;", ";1;;", "1;0.2;;", ";1;;", "0.2;0.2;;"};
-    StepsFileReader* reader = new StepsFileReader();
-    reader->set_dance(0);
+     DanceStepsPublisher* steps_pub = new DanceStepsPublisher();
 
-    while (ros::ok())
-    {
-        steps_pub->publish_step(reader->get_next_step());
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
+    ros::spin();
     return 0;
 }

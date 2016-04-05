@@ -7,11 +7,16 @@
  *
  **/
 
+#include "ros/ros.h"
+#include "std_msgs/Float64.h"
 #include "RealTimePeakDetector.hpp"
 
 using namespace std;
 
 RealTimePeakDetector::RealTimePeakDetector() {
+    // Peak publisher
+    ros::Publisher peak_pub;
+    
     buffer_loaded = false;
     last_instant_index = 0;
     
@@ -110,10 +115,18 @@ void RealTimePeakDetector::checkIfPeak() {
 
 // Decides the action to carry when a peak is found.
 void RealTimePeakDetector::processPeak() {
+    std_msgs::Float64 msg;
+    msg.data = (float) currentInstant_energy;
     
+    ROS_INFO("Sent beat: %f", msg.data);
+    peak_pub.publish(msg);
 }
 
 int main(int argc, char *argv[]) {
+    ros::init(argc, argv, "RT_peak_detector");
+    ros::NodeHandle n;
+    peak_pub = n.advertise<std_msgs::Float64>("beats", 1000);
+    
     RealTimePeakDetector* rtpd = new RealTimePeakDetector();
     
     for (int i = 0; i < 1024*63; i++) {
@@ -123,9 +136,9 @@ int main(int argc, char *argv[]) {
             rtpd->processAudio(0);
         }
     }
+    
+    return 0;
 }
-
-
 
 
 

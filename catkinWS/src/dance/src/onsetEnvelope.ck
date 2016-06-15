@@ -13,9 +13,10 @@ xmit.setHost( hostname, port );
 150 => int countThreshold;
 
 // prepare the short-time fft
-8 => int fftsize;
+512 => int fftsize;
 adc => FFT fft => blackhole;
 fftsize*2 => fft.size;
+Windowing.hann(256) => fft.window;
 polar prevSpec[fftsize];
 float diffSingleFreq;
 float sumDiffs;
@@ -58,7 +59,6 @@ while(true)
             <<< "sent (via OSC):", normDiff >>>;
         }
     } else {
-        <<< "Music OFF!" >>>;
         xmit.startMsg( "/onset", "f" );
         -1000 => xmit.addFloat;
     }
@@ -69,7 +69,7 @@ while(true)
     for(0 => int i; i < fftsize; i++) {
         fft.cval(i)$polar => prevSpec[i];
     }
-    16::ms => now;
+    4::ms => now;
 }
 
 // Functions and utilities
@@ -78,6 +78,7 @@ fun void checkMusicIsOff(float soundInt) {
     if(soundInt < offThreshold) {
         if(offCount > countThreshold) {
             1 => noMusic;
+            <<< "Music OFF!" >>>;
             return;
         }
         offCount++;
@@ -86,6 +87,7 @@ fun void checkMusicIsOff(float soundInt) {
         if(offCount < 0) {
             0 => offCount;
             0 => noMusic;
+            <<< "Music ON!" >>>;
         }
     }
 }

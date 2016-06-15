@@ -1,7 +1,7 @@
 #ifndef osc_float_receiver_h
 #define osc_float_receiver_h
 
-#define ONSET_SIGNAL_PERIOD_SEC 0.016
+#define ONSET_SIGNAL_PERIOD_SEC 0.004
 
 class OscFloatReceiver
 {

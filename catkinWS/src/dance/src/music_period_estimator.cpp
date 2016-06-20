@@ -1,3 +1,6 @@
+#include "ros/ros.h"
+#include "std_msgs/Int32.h"
+
 #include <string.h>
 #include <stdio.h>
 #include <cmath>
@@ -6,6 +9,8 @@
 
 #include <signal.h>
 #include <unistd.h>
+
+#define PERIOD_OSC_PORT 7001
 
 #define MAX_BPM 240
 #define MIN_BPM 40
@@ -23,6 +28,9 @@
 #define CENTER_BPM 120
 #define CENTER_PERIOD ((int) (60/(CENTER_BPM*ONSET_SIGNAL_PERIOD_SEC)))
 #define GLOBAL_PERIOD_THRESHOLD 25
+
+// ROS period publisher
+ros::Publisher period_pub;
 
 // Autocorrelation-limiting variables
 int max_period;
@@ -233,8 +241,13 @@ void sendPeriod()
     {
         printf("wtf?¿?\n");
     }
-    printf("Sent period %f bpm\n", 60/(current_global_period*ONSET_SIGNAL_PERIOD_SEC));
+	
+    ROS_INFO("Sent period %f bpm\n", 60/(current_global_period*ONSET_SIGNAL_PERIOD_SEC));
     test_hist[current_global_period-MIN_PERIOD]++;
+	
+	std_msgs::Int32 msg;
+	msg.data = current_global_period;
+    period_pub.publish(msg);
 }
 
 void test_autocorr()
@@ -285,12 +298,16 @@ void catchCtrlC()
     sigaction(SIGINT, &sigIntHandler, NULL);
 }
 
-int main()
+int main(int argc, char **argv)
 {
+	ros::init(argc, argv, "music_period_estimator");
+	ros::NodeHandle n;
+    period_pub = n.advertise<std_msgs::Int32>("/music_period", 1000);
+	
     catchCtrlC();
     
     int cnt = 0;
-    OscFloatReceiver *osc_rec = new OscFloatReceiver(7000);
+    OscFloatReceiver *osc_rec = new OscFloatReceiver(PERIOD_OSC_PORT);
     memset(current_autocorr, 0, sizeof(current_autocorr));
     memset(current_instant_periods, 0, sizeof(current_instant_periods));
     memset(current_signal, 0, sizeof(current_signal));

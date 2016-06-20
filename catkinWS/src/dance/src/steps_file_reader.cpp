@@ -5,9 +5,6 @@
 
 #include "steps_file_reader.h"
 
-#define DANCE_FILE_NAME "/home/redhome/guillermoj/catkinWS/src/dance/src/dance_save.dnc"
-#define DANCE_LENGTH 16
-
 
 std::string StepsFileReader::get_whole_dance(int dance_number)
 {
@@ -30,8 +27,8 @@ void StepsFileReader::set_dance(int dance_number)
 std::string StepsFileReader::get_step(int step_number)
 {
     std::string dance = last_dance;
-    int end = -1;
     int start = 0;
+    int end = last_dance.find("/", start);
     for(int i = 0; i < step_number; i++)
     {
         start = end + 1;
@@ -45,9 +42,9 @@ std::string StepsFileReader::get_next_step()
     next_step++;
     if(next_step >= DANCE_LENGTH)
     {
-        next_step = 1;
+        next_step = 0;
     }
-    return get_step(next_step-1);
+    return get_step(next_step);
 }
 
 StepsFileReader::StepsFileReader()
@@ -57,5 +54,5 @@ StepsFileReader::StepsFileReader()
     {
         ROS_INFO("ERROR: File containing the dances not found.");
     }
-    next_step = 1;
+    next_step = 0;
 }

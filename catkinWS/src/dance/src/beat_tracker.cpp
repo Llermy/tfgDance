@@ -1,7 +1,14 @@
+#include "ros/ros.h"
+#include "std_msgs/Float64.h"
+#include "std_msgs/Int32.h"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <string>
 #include "osc_float_receiver.hpp"
+
+#include <signal.h>
+#include <unistd.h>
 
 #define OSC_READ_PORT 7000
 #define MIN_PERIOD_uSEC 200000
@@ -14,6 +21,9 @@
 #define ONSETS_BUFFER_LENGTH 1200
 #define MAX_PERIODS_TO_COMPARE 3
 
+ros::Publisher beats_pub;
+ros::Subscriber period_sub;
+
 int current_period = 107; // The units of current_period is the period in which we receive floats of the discrete onset strength signal
 int period_count = 0;
 
@@ -22,6 +32,13 @@ float current_threshold = MIN_ONSET_STRENGTH_THRESHOLD;
 float current_onset_signal[ONSETS_BUFFER_LENGTH];
 
 int fewer_beats_counter = 0;
+
+void periodCallback(const std_msgs::Int32::ConstPtr& msg)
+{
+    float new_period = msg->data;
+    ROS_INFO("I heard period %f!", new_period);
+	current_period = (int) new_period;
+}
 
 void checkIfWeakerBeats(float onset)
 {
@@ -68,17 +85,43 @@ bool isBeat(float onset)
 
 void process_beat()
 {
-    printf("%d PEAK! %f\n", count, current_onset_signal[0]);
+	std_msgs::Float64 msg;
+	msg.data = 1;
+    beats_pub.publish(msg);
+    ROS_INFO("%d PEAK! %f\n", count, current_onset_signal[0]);
     count++;
+}
+
+void my_handler(int s)
+{
+    exit(0);
+}
+
+void catchCtrlC()
+{
+    struct sigaction sigIntHandler;
+    
+    sigIntHandler.sa_handler = my_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    
+    sigaction(SIGINT, &sigIntHandler, NULL);
 }
 
 int main(int argc, char *argv[])
 {
+    ros::init(argc, argv, "beat_tracker");
+	ros::NodeHandle n;
+    beats_pub = n.advertise<std_msgs::Float64>("/beats", 1000);
+	period_sub = n.subscribe("music_period", 1000, periodCallback);
+
+	catchCtrlC();	
+
     if(argc == 2)
     {
-        int bpm = std::stoi(argv[1]);
-        printf("Set period for testing: %d BPM", bpm);
-        current_period = 60/(bpm*ONSET_SIGNAL_PERIOD_SEC);
+        //int bpm = std::stoi(argv[1]);
+        //printf("Set period for testing: %d BPM", bpm);
+        //current_period = 60/(bpm*ONSET_SIGNAL_PERIOD_SEC);
     }
     
     memset(current_onset_signal, 0, sizeof(current_onset_signal));
@@ -115,6 +158,7 @@ int main(int argc, char *argv[])
         }
         
         period_count++;
+		ros::spinOnce();
     }
     return 0;
 }

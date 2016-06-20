@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-#define DANCE_FILE_NAME "dance_save.dnc"
+#define DANCE_FILE_NAME "/home/user/catGuille/src/dance/src/dance_save.dnc"
 #define DANCE_LENGTH 16
 
 class StepsFileReader

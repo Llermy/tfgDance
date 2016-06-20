@@ -1,14 +1,17 @@
 // host name, port and send object
 "localhost" => string hostname;
 7000 => int port;
-0 => int count;
-OscSend xmit;
-xmit.setHost( hostname, port );
+OscSend xmitPeriod;
+xmitPeriod.setHost( hostname, port );
+
+7001 => port;
+OscSend xmitBT;
+xmitBT.setHost( hostname, port );
 
 // variables to check if music is off
 1 => int noMusic;
 0 => float intensity;
-0.003 => float offThreshold;
+0.04 => float offThreshold;
 0 => int offCount;
 150 => int countThreshold;
 
@@ -50,17 +53,22 @@ while(true)
     }
     (sumDiffs - instantMean)/instantStd => normDiff;
     
+	//<<< intensity >>>;
     // send the results of the analysis if there is music
     checkMusicIsOff(intensity);
     if(!noMusic) {
-        xmit.startMsg( "/onset", "f" );
-        normDiff => xmit.addFloat;
+        xmitPeriod.startMsg( "/onset", "f" );
+        xmitBT.startMsg( "/onset", "f" );
+        normDiff => xmitPeriod.addFloat;
+        normDiff => xmitBT.addFloat;
         if(sumDiffs > 0.03) {
             <<< "sent (via OSC):", normDiff >>>;
         }
     } else {
-        xmit.startMsg( "/onset", "f" );
-        -1000 => xmit.addFloat;
+        xmitPeriod.startMsg( "/onset", "f" );
+        -1000 => xmitPeriod.addFloat;
+        xmitBT.startMsg( "/onset", "f" );
+        -1000 => xmitBT.addFloat;
     }
     
     // update previous spectrum and advance time

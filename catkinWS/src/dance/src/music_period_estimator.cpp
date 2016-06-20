@@ -10,7 +10,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#define PERIOD_OSC_PORT 7001
+#define PERIOD_OSC_PORT 7000
 
 #define MAX_BPM 240
 #define MIN_BPM 40

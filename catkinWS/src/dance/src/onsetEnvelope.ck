@@ -1,12 +1,10 @@
 // host name, port and send object
 "localhost" => string hostname;
-7000 => int port;
 OscSend xmitPeriod;
-xmitPeriod.setHost( hostname, port );
+xmitPeriod.setHost( hostname, 7000 );
 
-7001 => port;
 OscSend xmitBT;
-xmitBT.setHost( hostname, port );
+xmitBT.setHost( hostname, 7001 );
 
 // variables to check if music is off
 1 => int noMusic;

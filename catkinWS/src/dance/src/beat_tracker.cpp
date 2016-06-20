@@ -10,7 +10,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#define OSC_READ_PORT 7000
+#define OSC_READ_PORT 7001
 #define MIN_PERIOD_uSEC 200000
 
 #define MIN_ONSET_STRENGTH_THRESHOLD 1

@@ -35,8 +35,8 @@ int fewer_beats_counter = 0;
 
 void periodCallback(const std_msgs::Int32::ConstPtr& msg)
 {
-    float new_period = msg->data;
-    ROS_INFO("I heard period %f!", new_period);
+    int new_period = msg->data;
+    ROS_INFO("I heard period %d!", new_period);
 	current_period = (int) new_period;
 }
 
@@ -92,6 +92,14 @@ void process_beat()
     count++;
 }
 
+void send_no_music_signal()
+{
+	std_msgs::Float64 msg;
+	msg.data = 0;
+    beats_pub.publish(msg);
+    ROS_INFO("%d NO MUSIC! %f\n", count, current_onset_signal[0]);
+}
+
 void my_handler(int s)
 {
     exit(0);
@@ -135,6 +143,7 @@ int main(int argc, char *argv[])
         
         if(current_onset_signal[0] == -1000) // That means music is off
         {
+            send_no_music_signal();
             current_onset_signal[0] = 0;
             period_count = 0;
             current_threshold = MIN_ONSET_STRENGTH_THRESHOLD;

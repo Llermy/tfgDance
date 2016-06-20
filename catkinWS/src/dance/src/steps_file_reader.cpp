@@ -40,11 +40,11 @@ std::string StepsFileReader::get_step(int step_number)
 std::string StepsFileReader::get_next_step()
 {
     next_step++;
-    if(next_step >= DANCE_LENGTH)
+    if(next_step > DANCE_LENGTH)
     {
-        next_step = 0;
+        next_step = 1;
     }
-    return get_step(next_step);
+    return get_step(next_step-1);
 }
 
 StepsFileReader::StepsFileReader()

@@ -9,7 +9,7 @@ xmitBT.setHost( hostname, 7001 );
 // variables to check if music is off
 1 => int noMusic;
 0 => float intensity;
-0.04 => float offThreshold;
+0.01 => float offThreshold;
 0 => int offCount;
 150 => int countThreshold;
 
@@ -51,7 +51,7 @@ while(true)
     }
     (sumDiffs - instantMean)/instantStd => normDiff;
     
-	//<<< intensity >>>;
+	<<< intensity >>>;
     // send the results of the analysis if there is music
     checkMusicIsOff(intensity);
     if(!noMusic) {

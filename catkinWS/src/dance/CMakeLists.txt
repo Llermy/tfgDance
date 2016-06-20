@@ -6,7 +6,6 @@ project(dance)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
-  rospy
   std_msgs
 )
 
@@ -28,10 +27,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## * Let MSG_DEP_SET be the set of packages whose message types you use in
 ##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
 ## * In the file package.xml:
-##   * add a build_depend tag for "message_generation"
 ##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
-##     but can be declared for certainty nonetheless:
+##   * If MSG_DEP_SET isn't empty the following dependencies might have been
+##     pulled in transitively but can be declared for certainty nonetheless:
+##     * add a build_depend tag for "message_generation"
 ##     * add a run_depend tag for "message_runtime"
 ## * In this file (CMakeLists.txt):
 ##   * add "message_generation" and every package in MSG_DEP_SET to
@@ -65,26 +64,9 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-#generate_messages(DEPENDENCIES std_msgs)
-
-################################################
-## Declare ROS dynamic reconfigure parameters ##
-################################################
-
-## To declare and build dynamic reconfigure parameters within this
-## package, follow these steps:
-## * In the file package.xml:
-##   * add a build_depend and a run_depend tag for "dynamic_reconfigure"
-## * In this file (CMakeLists.txt):
-##   * add "dynamic_reconfigure" to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * uncomment the "generate_dynamic_reconfigure_options" section below
-##     and list every .cfg file to be processed
-
-## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
 # )
 
 ###################################
@@ -98,8 +80,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES baile
-#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  LIBRARIES dance
+#  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
 )
 
@@ -110,27 +92,38 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
 
-## Declare a C++ library
-# add_library(baile
-#   src/${PROJECT_NAME}/baile.cpp
+## Declare a cpp library
+# add_library(dance
+#   src/${PROJECT_NAME}/dance.cpp
 # )
 
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(baile ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+## Declare a cpp executable
+add_executable(dance_steps_pub src/dance_steps_publisher.cpp src/steps_file_reader.cpp)
 
-## Declare a C++ executable
-add_executable(dance_steps_publisher src/dance_steps_publisher.cpp src/steps_file_reader.cpp)
+add_executable(beat_tracker src/beat_tracker.cpp src/osc_float_receiver.cpp)
+
+add_executable(music_period_estimator src/music_period_estimator.cpp src/osc_float_receiver.cpp)
+
+## Add cmake target dependencies of the executable/library
+## as an example, message headers may need to be generated before nodes
+# add_dependencies(dance_node dance_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(dance_steps_publisher ${catkin_LIBRARIES})
+target_link_libraries(dance_steps_pub
+  ${catkin_LIBRARIES}
+)
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-add_dependencies(dance_steps_publisher dance_generate_messages_cpp)
+target_link_libraries(beat_tracker
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(music_period_estimator
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -147,7 +140,7 @@ add_dependencies(dance_steps_publisher dance_generate_messages_cpp)
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS baile baile_node
+# install(TARGETS dance dance_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -172,7 +165,7 @@ add_dependencies(dance_steps_publisher dance_generate_messages_cpp)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_baile.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_dance.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

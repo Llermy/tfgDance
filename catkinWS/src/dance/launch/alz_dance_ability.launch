@@ -1,0 +1,31 @@
+<!--
+  This launcher execute all nodes relatives to perform a gesture
+  -->
+<launch>
+    <arg name="robot" value="alz"/>
+
+    <group ns="$(arg robot)">
+        
+        <!-- Onset strength analysis node -->
+        <node name = "onset_strength_node" 
+            pkg = "dance" 
+            type = "onsetStrength_node" />
+            
+        <!-- Music period estimator -->
+        <node name = "music_period_estimator_node" 
+            pkg = "dance" 
+            type = "music_period_estimator" />
+        
+        <!-- Beat tracker -->
+        <node name = "beat_tracker_node" 
+            pkg = "dance" 
+            type = "beat_tracker" />
+
+        <!-- Dance subsystem -->
+        <node name="dance_steps_publisher"
+            pkg="dance"
+            type="dance_steps_pub"
+            output="screen" />
+
+    </group>
+</launch>

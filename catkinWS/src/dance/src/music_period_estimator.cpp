@@ -302,7 +302,7 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "music_period_estimator");
 	ros::NodeHandle n;
-    period_pub = n.advertise<std_msgs::Int32>("/music_period", 1000);
+    period_pub = n.advertise<std_msgs::Int32>("music_period", 1000);
 	
     catchCtrlC();
     

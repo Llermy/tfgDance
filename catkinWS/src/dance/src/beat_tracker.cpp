@@ -8,6 +8,8 @@
 #include <string>
 #include "osc_float_receiver.hpp"
 
+#include <stdlib.h>
+
 #include <signal.h>
 #include <unistd.h>
 
@@ -22,6 +24,9 @@
 #define ONSETS_BUFFER_LENGTH 1200
 #define MAX_PERIODS_TO_COMPARE 3
 
+#define NO_MUSIC 0
+#define SHUT_DOWN 2
+
 ros::Publisher beats_pub;
 ros::Subscriber period_sub;
 ros::Subscriber status_sub;
@@ -35,6 +40,16 @@ float current_onset_signal[ONSETS_BUFFER_LENGTH];
 
 int fewer_beats_counter = 0;
 int running = 0;
+std::clock_t start;
+int timer;
+
+void send_other_signal(int sig)
+{
+	std_msgs::Float64 msg;
+	msg.data = sig;
+    beats_pub.publish(msg);
+    ROS_INFO("%d SHUT DOWN!\n");
+}
 
 void statusCallback(const std_msgs::String::ConstPtr& msg)
 {
@@ -47,6 +62,7 @@ void statusCallback(const std_msgs::String::ConstPtr& msg)
     {
         ROS_INFO("%s! Stopped.\n", msg->data.c_str());
         running = 0;
+        send_other_signal(SHUT_DOWN);
     }
 }
 
@@ -109,14 +125,6 @@ void process_beat()
     count++;
 }
 
-void send_no_music_signal()
-{
-	std_msgs::Float64 msg;
-	msg.data = 0;
-    beats_pub.publish(msg);
-    ROS_INFO("%d NO MUSIC! %f\n", count, current_onset_signal[0]);
-}
-
 void my_handler(int s)
 {
     exit(0);
@@ -136,13 +144,14 @@ void catchCtrlC()
 int main(int argc, char *argv[])
 {
     running = 0;
+    start = std::clock();
+    
     ros::init(argc, argv, "beat_tracker");
 	ros::NodeHandle n;
-    beats_pub = n.advertise<std_msgs::Float64>("/beats", 1000);
+    beats_pub = n.advertise<std_msgs::Float64>("beats", 1000);
 	period_sub = n.subscribe("music_period", 1000, periodCallback);
-	status_sub = n.subscribe("dance_command", 1000, statusCallback);
-
-
+	status_sub = n.subscribe("dance_command", 1000, statusCallback);    
+    
 	catchCtrlC();	
 
     if(argc == 2)
@@ -159,7 +168,7 @@ int main(int argc, char *argv[])
     {
         if(!running)
         {
-            //
+            //send_other_signal(SHUT_DOWN);
         }
         else
         {
@@ -168,31 +177,33 @@ int main(int argc, char *argv[])
             //printf("%f\n", current_onset_signal[0]);
             
             if(current_onset_signal[0] == -1000) // That means music is off
-            {
-                send_no_music_signal();
+            {   
                 current_onset_signal[0] = 0;
                 period_count = 0;
                 current_threshold = MIN_ONSET_STRENGTH_THRESHOLD;
-                continue;
+                send_other_signal(NO_MUSIC);
             }
-            checkIfWeakerBeats(current_onset_signal[0]);
-            
-            if (isBeat(current_onset_signal[0]))
+            else
             {
-                period_count = 0;
-                process_beat();
-                //usleep(MIN_PERIOD_uSEC);
-            }
-            else if (period_count > current_period)
-            {
-                period_count = 0;
-                if(/*current_onset_signal[0] + 1 > 0.03*/1)
+                checkIfWeakerBeats(current_onset_signal[0]);
+                
+                if (isBeat(current_onset_signal[0]))
                 {
+                    period_count = 0;
                     process_beat();
+                    //usleep(MIN_PERIOD_uSEC);
                 }
+                else if (period_count > current_period)
+                {
+                    period_count = 0;
+                    if(/*current_onset_signal[0] + 1 > 0.03*/1)
+                    {
+                        process_beat();
+                    }
+                }
+                
+                period_count++;
             }
-            
-            period_count++;
         }
         ros::spinOnce();
     }

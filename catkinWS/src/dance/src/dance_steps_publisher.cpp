@@ -13,7 +13,7 @@
 #define ETTS_LANGUAGE "es"
 #define NUM_OF_SENTENCES 4
 
-#define NUM_DANCES 4
+#define NUM_DANCES 5
 #define NUM_BODY_PARTS 5
 #define LEFT_ARM 0
 #define RIGHT_ARM 1

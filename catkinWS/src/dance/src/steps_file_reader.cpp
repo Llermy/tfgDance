@@ -5,7 +5,7 @@
 
 #include "steps_file_reader.h"
 
-int dance_lengths[] = {16, 32, 16, 16};
+int dance_lengths[] = {16, 32, 16, 16, 16};
 
 std::string StepsFileReader::get_whole_dance(int dance_number)
 {

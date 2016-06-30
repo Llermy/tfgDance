@@ -51,7 +51,7 @@ while(true)
     }
     (sumDiffs - instantMean)/instantStd => normDiff;
     
-	<<< intensity >>>;
+	//<<< intensity >>>;
     // send the results of the analysis if there is music
     checkMusicIsOff(intensity);
     if(!noMusic) {
@@ -60,7 +60,7 @@ while(true)
         normDiff => xmitPeriod.addFloat;
         normDiff => xmitBT.addFloat;
         if(sumDiffs > 0.03) {
-            <<< "sent (via OSC):", normDiff >>>;
+            //<<< "sent (via OSC):", normDiff >>>;
         }
     } else {
         xmitPeriod.startMsg( "/onset", "f" );
@@ -84,7 +84,7 @@ fun void checkMusicIsOff(float soundInt) {
     if(soundInt < offThreshold) {
         if(offCount > countThreshold) {
             1 => noMusic;
-            <<< "Music OFF!" >>>;
+            //<<< "Music OFF!" >>>;
             return;
         }
         offCount++;

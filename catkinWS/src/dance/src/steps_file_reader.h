@@ -3,13 +3,13 @@
 
 #include <fstream>
 
-#define DANCE_FILE_NAME "/home/user/catGuille/src/dance/src/dance_save.dnc"
-#define DANCE_LENGTH 16
+#define DANCE_FILE_NAME "/home/user/catkin_ws/src/dance/src/dance_save.dnc"
 
 class StepsFileReader
 {
 public:
     int next_step;
+    int current_dance;
     std::string last_dance;
     std::fstream dance_file;
     

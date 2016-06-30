@@ -13,7 +13,7 @@
 #define ETTS_LANGUAGE "es"
 #define NUM_OF_SENTENCES 4
 
-#define NUM_DANCES 3
+#define NUM_DANCES 4
 #define NUM_BODY_PARTS 5
 #define LEFT_ARM 0
 #define RIGHT_ARM 1
@@ -128,7 +128,7 @@ public:
     
     void publish_step(std::string step)
     {
-        std::cout << step << "\n";
+        ROS_INFO("%s\n", step.c_str());
         int end = -1;
         int start = 0;
         int i;

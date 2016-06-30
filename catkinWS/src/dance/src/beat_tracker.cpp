@@ -48,7 +48,7 @@ void send_other_signal(int sig)
 	std_msgs::Float64 msg;
 	msg.data = sig;
     beats_pub.publish(msg);
-    ROS_INFO("%d SHUT DOWN!\n");
+    ROS_INFO("SHUT DOWN!\n");
 }
 
 void statusCallback(const std_msgs::String::ConstPtr& msg)

@@ -5,6 +5,7 @@
 
 #include "steps_file_reader.h"
 
+int dance_lengths[] = {16, 32, 16, 16};
 
 std::string StepsFileReader::get_whole_dance(int dance_number)
 {
@@ -16,6 +17,7 @@ std::string StepsFileReader::get_whole_dance(int dance_number)
 
 void StepsFileReader::set_dance(int dance_number)
 {
+	current_dance = dance_number - 1;
     dance_file.seekg(std::ios::beg);
     for(int i = 0; i < dance_number - 1; i++)
     {
@@ -40,7 +42,7 @@ std::string StepsFileReader::get_step(int step_number)
 std::string StepsFileReader::get_next_step()
 {
     next_step++;
-    if(next_step > DANCE_LENGTH)
+    if(next_step > dance_lengths[current_dance])
     {
         next_step = 1;
     }
